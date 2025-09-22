@@ -32,13 +32,17 @@ KEEP_GRADE = [grade for grade in GRADE
                   if grade == 'GOLD'
                   or grade == 'SILVER'
               ]
-GRADE_CONDITION = {
+GRADE_CHANGE_SCORE_LIMIT = {
     "NORMAL": 0,
     "GOLD": 50,
     "SILVER": 30,
 }
-TRAINING_DOW = DOW["wednesday"]
+TRAINING_DOW = [DOW["wednesday"]]
 WEEKEND_DOW = [DOW["saturday"], DOW["sunday"]]
+
+TRAINING_ATTENDANCE_SCORE = 3
+WEEKEND_ATTENDANCE_SCORE = 2
+ATTENDANCE_SCORE = 1
 
 def apply_attendance_data(records):
     for r in records:
@@ -53,12 +57,12 @@ def apply_attendance_data(records):
 
 def calculate_points(dow) -> int:
     point = 0
-    if dow == TRAINING_DOW:
-        point += 3
+    if dow in TRAINING_DOW:
+        point += TRAINING_ATTENDANCE_SCORE
     elif dow in WEEKEND_DOW:
-        point += 2
+        point += WEEKEND_ATTENDANCE_SCORE
     else:
-        point += 1
+        point += ATTENDANCE_SCORE
     return point
 
 
@@ -84,7 +88,7 @@ def manage_attendance():
 
 def apply_bonus():
     for i in range(1, member_cnt + 1):
-        if attendances[i][TRAINING_DOW] >= ATTENDANCE_BONUS_CONDITION:
+        if sum([attendances[i][dow] for dow in TRAINING_DOW]) >= ATTENDANCE_BONUS_CONDITION:
             points[i] += ATTENDANCE_BONUS_SCORE
         if sum([attendances[i][dow] for dow in WEEKEND_DOW]) >= ATTENDANCE_BONUS_CONDITION:
             points[i] += ATTENDANCE_BONUS_SCORE
@@ -93,7 +97,7 @@ def apply_bonus():
 def change_member_grade():
     for member_id in range(1, member_cnt + 1):
         for grade_id, grade in enumerate(GRADE):
-            if points[member_id] >= GRADE_CONDITION.get(grade):
+            if points[member_id] >= GRADE_CHANGE_SCORE_LIMIT.get(grade):
                 # 포인트가 50점 이상인 경우 1등급(골드)
                 grades[member_id] = grade_id
                 break
@@ -107,10 +111,11 @@ def suggest_player_to_remove():
     print("\nRemoved player")
     print("==============")
     for i in range(1, member_cnt + 1):
-        if grades[i] in KEEP_GRADE or attendances[i][TRAINING_DOW] != 0 :
+        if grades[i] in KEEP_GRADE:
             continue
+        training_attendances = sum([1 for training_dow in TRAINING_DOW if attendances[i][training_dow] != 0])
         weekend_attendances = sum([1 for weekend_dow in WEEKEND_DOW if attendances[i][weekend_dow] != 0])
-        if weekend_attendances == 0:
+        if training_attendances == weekend_attendances == 0:
             print(names[i])
 
 

@@ -21,4 +21,4 @@ NAME : Zane, POINT : 1, GRADE : NORMAL
 Removed player
 ==============
 Bob
-Zan
+Zane

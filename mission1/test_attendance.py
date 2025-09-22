@@ -24,8 +24,9 @@ NAME : Zane, POINT : 1, GRADE : NORMAL
 Removed player
 ==============
 Bob
-Zan'''
+Zane'''
 def test_golden(capsys):
     manage_attendance()
     captured = capsys.readouterr()
+    print(captured.out)
     assert expected in captured.out
