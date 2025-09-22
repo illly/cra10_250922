@@ -1,4 +1,5 @@
 from AttendancePolicy import PolicyVersion1, Calendar
+from grade_policy import GradePolicy as Grade
 
 # define file spec
 FILE_PATH = "attendance_weekday_500.txt"
@@ -19,7 +20,7 @@ class AttendanceManager:
 
         self.attendances = [[0] * self.policy.MAX_MEMBERS for _ in range(self.policy.MAX_MEMBERS)]
         self.points = [0] * self.policy.MAX_MEMBERS
-        self.grades = [0] * self.policy.MAX_MEMBERS
+        self.grades = [Grade] * self.policy.MAX_MEMBERS
         self.names = [''] * self.policy.MAX_MEMBERS
 
     def apply_attendance_data(self, records):
@@ -73,27 +74,25 @@ class AttendanceManager:
 
     def change_member_grade(self):
         for member_id in range(1, self.member_cnt + 1):
-            for grade_id, grade in enumerate(self.policy.GRADE):
-                if self.points[member_id] >= self.policy.GRADE_CHANGE_SCORE.get(grade):
-                    # 포인트가 50점 이상인 경우 1등급(골드)
-                    self.grades[member_id] = grade_id
-                    break
+            for grade in self.policy.GRADE:
+                if self.points[member_id] >= grade.minimum_score:
+                    self.grades[member_id] = grade
 
             # 회원 별 점수 및 등급 출력
             print(f"NAME : {self.names[member_id]}, POINT : {self.points[member_id]}, GRADE : ", end="")
-            print(self.policy.GRADE[self.grades[member_id]])
+            print(self.grades[member_id].name)
 
 
     def suggest_player_to_remove(self):
         print("\nRemoved player")
         print("==============")
-        for i in range(1, self.member_cnt + 1):
-            if self.grades[i] in self.policy.CUT_PROTECTED_GRADE:
+        for member_id in range(1, self.member_cnt + 1):
+            if self.grades[member_id].cut_protected:
                 continue
-            training_attendances = sum([1 for training_dow in self.policy.TRAINING_DOW if self.attendances[i][training_dow] != 0])
-            weekend_attendances = sum([1 for weekend_dow in self.policy.WEEKEND_DOW if self.attendances[i][weekend_dow] != 0])
+            training_attendances = sum([1 for training_dow in self.policy.TRAINING_DOW if self.attendances[member_id][training_dow] != 0])
+            weekend_attendances = sum([1 for weekend_dow in self.policy.WEEKEND_DOW if self.attendances[member_id][weekend_dow] != 0])
             if training_attendances == weekend_attendances == 0:
-                print(self.names[i])
+                print(self.names[member_id])
 
 
     def read_file(self) -> list[list[str]]:

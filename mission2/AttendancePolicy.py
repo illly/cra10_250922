@@ -1,4 +1,5 @@
 import abc
+from grade_policy import GoldGradePolicy, SilverGradePolicy, NormalGradePolicy
 class Calendar:
     DOW = {
         "monday": 0,
@@ -32,10 +33,13 @@ class Policy(abc.ABC):
         pass
 
 
-    @abc.abstractmethod
     def init_grade_policy(self):
-        pass
-
+        # define grades increse order in minimum-score
+        self.GRADE = [
+            NormalGradePolicy(),
+            SilverGradePolicy(),
+            GoldGradePolicy(),
+        ]
 
 class PolicyVersion1(Policy):
     def init_general_policy(self):
@@ -50,22 +54,3 @@ class PolicyVersion1(Policy):
         self.TRAINING_ATTENDANCE_SCORE = 3
         self.WEEKEND_ATTENDANCE_SCORE = 2
         self.ATTENDANCE_SCORE = 1
-
-
-    def init_grade_policy(self):
-    # define grade policy
-        self.GRADE = [
-            "GOLD",
-            "SILVER",
-            "NORMAL",
-        ]
-        self.GRADE_CHANGE_SCORE = {
-            "NORMAL": 0,
-            "GOLD": 50,
-            "SILVER": 30,
-        }
-        self.CUT_PROTECTED_GRADE = [
-            self.GRADE.index(grade) for grade in self.GRADE
-                if grade == 'GOLD'
-                or grade == 'SILVER'
-        ]
