@@ -1,4 +1,4 @@
-from AttendancePolicy import PolicyVersion1, Calendar
+from attendance_policy import PolicyVersion1, Calendar
 from grade_policy import GradePolicy as Grade
 
 # define file spec
