@@ -1,5 +1,4 @@
 # init DB
-from idlelib.autocomplete import ATTRS
 
 members = {}
 member_cnt = 0
@@ -9,9 +8,9 @@ attendances = [[0] * MAX_MEMBERS for _ in range(MAX_MEMBERS)]
 points = [0] * MAX_MEMBERS
 grades = [0] * MAX_MEMBERS
 names = [''] * MAX_MEMBERS
-training_attendances = [0] * MAX_MEMBERS
-weekend_attendances = [0] * MAX_MEMBERS
 
+
+# define policy
 ATTENDANCE_BONUS_CONDITION = 10
 ATTENDANCE_BONUS_SCORE = 10
 
@@ -49,15 +48,7 @@ def apply_attendance_data(records):
         member_id = get_member_id(name)
 
         points[member_id] += calculate_points(dow)
-        check_attendance(dow, member_id)
-
-
-def check_attendance(dow, member_id):
-    if dow == TRAINING_DOW:
-        training_attendances[member_id] += 1
-    elif dow in WEEKEND_DOW:
-        weekend_attendances[member_id] += 1
-    attendances[member_id][dow] += 1
+        attendances[member_id][dow] += 1
 
 
 def calculate_points(dow) -> int:
@@ -116,7 +107,10 @@ def suggest_player_to_remove():
     print("\nRemoved player")
     print("==============")
     for i in range(1, member_cnt + 1):
-        if grades[i] not in KEEP_GRADE and training_attendances[i] == 0 and weekend_attendances[i] == 0:
+        if grades[i] in KEEP_GRADE or attendances[i][TRAINING_DOW] != 0 :
+            continue
+        weekend_attendances = sum([1 for weekend_dow in WEEKEND_DOW if attendances[i][weekend_dow] != 0])
+        if weekend_attendances == 0:
             print(names[i])
 
 
