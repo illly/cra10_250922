@@ -1,9 +1,9 @@
-from idlelib.run import manage_socket
+# init DB
+from idlelib.autocomplete import ATTRS
 
 members = {}
 member_cnt = 0
 
-# dat[사용자ID][요일]
 MAX_MEMBERS = 100
 attendances = [[0] * MAX_MEMBERS for _ in range(MAX_MEMBERS)]
 points = [0] * MAX_MEMBERS
@@ -12,54 +12,116 @@ names = [''] * MAX_MEMBERS
 training_attendances = [0] * MAX_MEMBERS
 weekend_attendances = [0] * MAX_MEMBERS
 
-def cleansing_and_input_data(w, wk):
-    #데이터를 클린징하 후 db에 적재
+ATTENDANCE_BONUS_CONDITION = 10
+ATTENDANCE_BONUS_SCORE = 10
+
+DOW = {
+    "monday": 0,
+    "tuesday": 1,
+    "wednesday": 2,
+    "thursday": 3,
+    "friday": 4,
+    "saturday": 5,
+    "sunday": 6
+}
+GRADE = [
+    "GOLD",
+    "SILVER",
+    "NORMAL",
+]
+KEEP_GRADE = [grade for grade in GRADE
+                  if grade == 'GOLD'
+                  or grade == 'SILVER'
+              ]
+GRADE_CONDITION = {
+    "NORMAL": 0,
+    "GOLD": 50,
+    "SILVER": 30,
+}
+TRAINING_DOW = DOW["wednesday"]
+WEEKEND_DOW = [DOW["saturday"], DOW["sunday"]]
+
+def apply_attendance_data(records):
+    for r in records:
+        #데이터를 클린징하 후 db에 적재
+        name = r['name']
+        dow = r['dow']
+        member_id = get_member_id(name)
+
+        points[member_id] += calculate_points(dow)
+        check_attendance(dow, member_id)
+
+
+def check_attendance(dow, member_id):
+    if dow == TRAINING_DOW:
+        training_attendances[member_id] += 1
+    elif dow in WEEKEND_DOW:
+        weekend_attendances[member_id] += 1
+    attendances[member_id][dow] += 1
+
+
+def calculate_points(dow) -> int:
+    point = 0
+    if dow == TRAINING_DOW:
+        point += 3
+    elif dow in WEEKEND_DOW:
+        point += 2
+    else:
+        point += 1
+    return point
+
+
+def get_member_id(name):
     global member_cnt
 
-    # 회원 테이블 초기화
-    if w not in members:
+    if name not in members:
         member_cnt += 1
-        members[w] = member_cnt
-        names[member_cnt] = w
-    # 회원 id 획득
-    id2 = members[w]
+        members[name] = member_cnt
+        names[member_cnt] = name
+    return members[name]
 
-    # 점수 계산
-    add_point = 0
-    index = 0
-
-    # 요일 별 점수 부여, day of week std를 이용하도록 개선 필요
-    if wk == "monday":
-        index = 0
-        add_point += 1
-    elif wk == "tuesday":
-        index = 1
-        add_point += 1
-    elif wk == "wednesday":
-        index = 2
-        add_point += 3
-        training_attendances[id2] += 1
-    elif wk == "thursday":
-        index = 3
-        add_point += 1
-    elif wk == "friday":
-        index = 4
-        add_point += 1
-    elif wk == "saturday":
-        index = 5
-        add_point += 2
-        weekend_attendances[id2] += 1
-    elif wk == "sunday":
-        index = 6
-        add_point += 2
-        weekend_attendances[id2] += 1
-    # 출석 도장 찍고
-    attendances[id2][index] += 1
-    # 점수 테이블 업데이트
-    points[id2] += add_point
 
 def manage_attendance():
-    #TODO: 이해한 다음 함수로 쪼개기
+    records = read_file()
+    if len(records) < 0:
+        return
+    apply_attendance_data(records)
+    apply_bonus()
+    change_member_grade()
+    suggest_player_to_remove()
+
+
+def apply_bonus():
+    for i in range(1, member_cnt + 1):
+        if attendances[i][TRAINING_DOW] >= ATTENDANCE_BONUS_CONDITION:
+            points[i] += ATTENDANCE_BONUS_SCORE
+        if sum([attendances[i][dow] for dow in WEEKEND_DOW]) >= ATTENDANCE_BONUS_CONDITION:
+            points[i] += ATTENDANCE_BONUS_SCORE
+
+
+def change_member_grade():
+    for member_id in range(1, member_cnt + 1):
+        for grade_id, grade in enumerate(GRADE):
+            if points[member_id] >= GRADE_CONDITION.get(grade):
+                # 포인트가 50점 이상인 경우 1등급(골드)
+                grades[member_id] = grade_id
+                break
+
+        # 회원 별 점수 및 등급 출력
+        print(f"NAME : {names[member_id]}, POINT : {points[member_id]}, GRADE : ", end="")
+        print(GRADE[grades[member_id]])
+
+
+def suggest_player_to_remove():
+    print("\nRemoved player")
+    print("==============")
+    for i in range(1, member_cnt + 1):
+        if grades[i] not in KEEP_GRADE and training_attendances[i] == 0 and weekend_attendances[i] == 0:
+            print(names[i])
+
+
+def read_file() -> list[list[str]]:
+    records = []
     try:
         # Read Input File
         with open("attendance_weekday_500.txt", encoding='utf-8') as f:
@@ -67,46 +129,25 @@ def manage_attendance():
                 line = f.readline()
                 if not line:
                     break
-                parts = line.strip().split()
-                # 모든 row는 두개의 열로 구성되어 있음, 1개일 경우 예외처리 필요
-                if len(parts) == 2:
-                    cleansing_and_input_data(parts[0], parts[1])
-        # 점수 부여, 요일 별 점수 부여 룰이 명시적으로 들어나도록 수정 필요
-        for i in range(1, member_cnt + 1):
-            if attendances[i][2] > 9:
-                #수요일에 10번 이상 참석한 경우 10점 가산점
-                points[i] += 10
-            if attendances[i][5] + attendances[i][6] > 9:
-                # 주말(토요일, 일요일)에 10번 이상 참석한 경우 10점 가산점
-                points[i] += 10
-            if points[i] >= 50:
-                # 포인트가 50점 이상인 경우 1등급(골드)
-                grades[i] = 1
-            elif points[i] >= 30:
-                # 포인트가 30점 이상인 경우 2등급(실버)
-                grades[i] = 2
-            else:
-                # 그외 0등급(노말)
-                grades[i] = 0
-            # 확장성을 고려하여 리팩토링 필요
-
-            # 회원 별 점수 및 등급 출력
-            print(f"NAME : {names[i]}, POINT : {points[i]}, GRADE : ", end="")
-            if grades[i] == 1:
-                print("GOLD")
-            elif grades[i] == 2:
-                print("SILVER")
-            else:
-                print("NORMAL")
-        # 탈락 후보 출력
-        print("\nRemoved player")
-        print("==============")
-        for i in range(1, member_cnt + 1):
-            if grades[i] not in (1, 2) and training_attendances[i] == 0 and weekend_attendances[i] == 0:
-                print(names[i])
-    
+                r = line.strip().split()
+                if len(r) == 2:
+                    records.append(format_record(r))
+                else:
+                    raise ValueError('Invalid data format came with reading file')
     except FileNotFoundError:
         print("파일을 찾을 수 없습니다.")
+    return records
+
+
+def format_record(record):
+    dow = record[1].lower()
+    if dow not in DOW.keys():
+        raise ValueError('Invalid Day of week came')
+    return {
+        'name': record[0],
+        'dow': DOW[dow]
+    }
+
 
 if __name__ == "__main__":
     manage_attendance()
