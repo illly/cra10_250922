@@ -2,6 +2,8 @@
 FILE_PATH = "attendance_weekday_500.txt"
 NAME_FIELD = "name"
 DAY_OF_WEEK_FIELD = "dow"
+MAX_FILE_LENGTH = 500
+NO_FIELDS = 2
 
 # define policy
 MAX_MEMBERS = 100
@@ -130,12 +132,12 @@ def read_file() -> list[list[str]]:
     try:
         # Read Input File
         with open(FILE_PATH, encoding='utf-8') as f:
-            for _ in range(500):
+            for _ in range(MAX_FILE_LENGTH):
                 line = f.readline()
                 if not line:
                     break
                 r = line.strip().split()
-                if len(r) == 2:
+                if len(r) == NO_FIELDS:
                     records.append(format_record(r))
                 else:
                     raise ValueError('Invalid data format came with reading file')
