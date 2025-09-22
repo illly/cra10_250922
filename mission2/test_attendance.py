@@ -1,5 +1,6 @@
 import pytest
-from attendance import manage_attendance
+from attendance import AttendanceManager
+from AttendancePolicy import Policy
 
 expected = '''NAME : Umar, POINT : 48, GRADE : SILVER
 NAME : Daisy, POINT : 45, GRADE : SILVER
@@ -26,7 +27,8 @@ Removed player
 Bob
 Zane'''
 def test_golden_master(capsys):
-    manage_attendance()
+    manager = AttendanceManager(Policy())
+    manager.manage_attendance()
     captured = capsys.readouterr()
     print(captured.out)
     assert expected in captured.out
