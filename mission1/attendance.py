@@ -25,7 +25,7 @@ GRADE = [
     "NORMAL",
 ]
 
-KEEP_GRADE = [grade for grade in GRADE
+KEEP_GRADE = [GRADE.index(grade) for grade in GRADE
                   if grade == 'GOLD'
                   or grade == 'SILVER'
               ]
