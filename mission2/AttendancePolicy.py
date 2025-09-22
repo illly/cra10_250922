@@ -1,7 +1,4 @@
-class Policy:
-    MAX_MEMBERS = 100
-    ATTENDANCE_BONUS_CONDITION = 10
-    ATTENDANCE_BONUS_SCORE = 10
+class Calendar:
     DOW = {
         "monday": 0,
         "tuesday": 1,
@@ -11,8 +8,15 @@ class Policy:
         "saturday": 5,
         "sunday": 6
     }
-    TRAINING_DOW = [DOW["wednesday"]]
-    WEEKEND_DOW = [DOW["saturday"], DOW["sunday"]]
+    def is_valid_dow(day):
+        return day in Calendar.DOW
+
+class Policy:
+    MAX_MEMBERS = 100
+    ATTENDANCE_BONUS_CONDITION = 10
+    ATTENDANCE_BONUS_SCORE = 10
+    TRAINING_DOW = [Calendar.DOW["wednesday"]]
+    WEEKEND_DOW = [Calendar.DOW["saturday"], Calendar.DOW["sunday"]]
 
     TRAINING_ATTENDANCE_SCORE = 3
     WEEKEND_ATTENDANCE_SCORE = 2

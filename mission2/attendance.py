@@ -1,4 +1,4 @@
-from AttendancePolicy import Policy
+from AttendancePolicy import Policy, Calendar
 
 # define file spec
 FILE_PATH = "attendance_weekday_500.txt"
@@ -117,11 +117,11 @@ class AttendanceManager:
 
     def format_record(self, record):
         dow = record[1].lower()
-        if dow not in self.policy.DOW.keys():
+        if not Calendar.is_valid_dow(dow):
             raise ValueError('Invalid Day of week came')
         return {
             NAME_FIELD: record[0],
-            DAY_OF_WEEK_FIELD: self.policy.DOW.get(dow)
+            DAY_OF_WEEK_FIELD: Calendar.DOW.get(dow)
         }
 
 
