@@ -53,8 +53,8 @@ names = [''] * MAX_MEMBERS
 def apply_attendance_data(records):
     for r in records:
         #데이터를 클린징하 후 db에 적재
-        name = r[NAME_FIELD]
-        dow = r[DAY_OF_WEEK_FIELD]
+        name = r.get(NAME_FIELD)
+        dow = r.get(DAY_OF_WEEK_FIELD)
         member_id = get_member_id(name)
 
         points[member_id] += calculate_points(dow)
@@ -79,7 +79,7 @@ def get_member_id(name):
         member_cnt += 1
         members[name] = member_cnt
         names[member_cnt] = name
-    return members[name]
+    return members.get(name)
 
 
 def manage_attendance():
@@ -150,7 +150,7 @@ def format_record(record):
         raise ValueError('Invalid Day of week came')
     return {
         NAME_FIELD: record[0],
-        DAY_OF_WEEK_FIELD: DOW[dow]
+        DAY_OF_WEEK_FIELD: DOW.get(dow)
     }
 
 
