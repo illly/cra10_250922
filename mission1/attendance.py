@@ -1,16 +1,10 @@
-# init DB
 
-members = {}
-member_cnt = 0
-
-MAX_MEMBERS = 100
-attendances = [[0] * MAX_MEMBERS for _ in range(MAX_MEMBERS)]
-points = [0] * MAX_MEMBERS
-grades = [0] * MAX_MEMBERS
-names = [''] * MAX_MEMBERS
-
+FILE_PATH = "attendance_weekday_500.txt"
+NAME_FIELD = "name"
+DAY_OF_WEEK_FIELD = "dow"
 
 # define policy
+MAX_MEMBERS = 100
 ATTENDANCE_BONUS_CONDITION = 10
 ATTENDANCE_BONUS_SCORE = 10
 
@@ -28,10 +22,12 @@ GRADE = [
     "SILVER",
     "NORMAL",
 ]
+
 KEEP_GRADE = [grade for grade in GRADE
                   if grade == 'GOLD'
                   or grade == 'SILVER'
               ]
+
 GRADE_CHANGE_SCORE_LIMIT = {
     "NORMAL": 0,
     "GOLD": 50,
@@ -44,11 +40,21 @@ TRAINING_ATTENDANCE_SCORE = 3
 WEEKEND_ATTENDANCE_SCORE = 2
 ATTENDANCE_SCORE = 1
 
+# init DB
+members = {}
+member_cnt = 0
+
+attendances = [[0] * MAX_MEMBERS for _ in range(MAX_MEMBERS)]
+points = [0] * MAX_MEMBERS
+grades = [0] * MAX_MEMBERS
+names = [''] * MAX_MEMBERS
+
+
 def apply_attendance_data(records):
     for r in records:
         #데이터를 클린징하 후 db에 적재
-        name = r['name']
-        dow = r['dow']
+        name = r[NAME_FIELD]
+        dow = r[DAY_OF_WEEK_FIELD]
         member_id = get_member_id(name)
 
         points[member_id] += calculate_points(dow)
@@ -123,7 +129,7 @@ def read_file() -> list[list[str]]:
     records = []
     try:
         # Read Input File
-        with open("attendance_weekday_500.txt", encoding='utf-8') as f:
+        with open(FILE_PATH, encoding='utf-8') as f:
             for _ in range(500):
                 line = f.readline()
                 if not line:
@@ -143,8 +149,8 @@ def format_record(record):
     if dow not in DOW.keys():
         raise ValueError('Invalid Day of week came')
     return {
-        'name': record[0],
-        'dow': DOW[dow]
+        NAME_FIELD: record[0],
+        DAY_OF_WEEK_FIELD: DOW[dow]
     }
 
 
