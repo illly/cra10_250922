@@ -8,4 +8,4 @@
 | D5   | X |
 
 # Code Coverage
-![캡쳐 화면](./mission2/coverage.jpg "Code Coverage 캡쳐 화면")
+![캡쳐 화면](./mission2/coverage.jpeg "Code Coverage 캡쳐 화면")
