@@ -1,4 +1,4 @@
-from AttendancePolicy import PolicyVersion1, Calendar
+from attendance_policy import PolicyVersion1, Calendar
 from grade_policy import GradePolicy as Grade
 
 # define file spec
@@ -56,7 +56,7 @@ class AttendanceManager:
 
     def manage_attendance(self):
         records = self.read_file()
-        if len(records) < 0:
+        if len(records) <= 0:
             return
         self.apply_attendance_data(records)
         self.apply_bonus()

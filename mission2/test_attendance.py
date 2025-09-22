@@ -31,3 +31,16 @@ def test_golden_master(capsys):
     captured = capsys.readouterr()
     print(captured.out)
     assert expected in captured.out
+
+def test_invalid_policy_version():
+    with pytest.raises(ValueError):
+        manager = create_attendance_manager(2)
+
+def test_invalid_dow():
+    manager = create_attendance_manager(1)
+    with pytest.raises(ValueError):
+        manager.format_record([None, 'notexistsday'])
+def test_no_data(mocker):
+    manager = create_attendance_manager(1)
+    mocker.patch("attendance.AttendanceManager.read_file", return_value=[])
+    assert manager.manage_attendance() is None
