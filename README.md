@@ -5,7 +5,7 @@
 | D2   | O |
 | D3   | O |
 | D4   | O |
-| D5   | X |
+| D5   | O |
 
 # Code Coverage
 ### index
