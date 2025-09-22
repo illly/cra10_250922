@@ -1,4 +1,4 @@
-from AttendancePolicy import Policy, Calendar
+from AttendancePolicy import PolicyVersion1, Calendar
 
 # define file spec
 FILE_PATH = "attendance_weekday_500.txt"
@@ -74,7 +74,7 @@ class AttendanceManager:
     def change_member_grade(self):
         for member_id in range(1, self.member_cnt + 1):
             for grade_id, grade in enumerate(self.policy.GRADE):
-                if self.points[member_id] >= self.policy.GRADE_CHANGE_SCORE_LIMIT.get(grade):
+                if self.points[member_id] >= self.policy.GRADE_CHANGE_SCORE.get(grade):
                     # 포인트가 50점 이상인 경우 1등급(골드)
                     self.grades[member_id] = grade_id
                     break
@@ -88,7 +88,7 @@ class AttendanceManager:
         print("\nRemoved player")
         print("==============")
         for i in range(1, self.member_cnt + 1):
-            if self.grades[i] in self.policy.KEEP_GRADE:
+            if self.grades[i] in self.policy.CUT_PROTECTED_GRADE:
                 continue
             training_attendances = sum([1 for training_dow in self.policy.TRAINING_DOW if self.attendances[i][training_dow] != 0])
             weekend_attendances = sum([1 for weekend_dow in self.policy.WEEKEND_DOW if self.attendances[i][weekend_dow] != 0])
@@ -126,5 +126,5 @@ class AttendanceManager:
 
 
 if __name__ == "__main__":
-    manager = AttendanceManager(Policy())
+    manager = AttendanceManager(PolicyVersion1())
     manager.manage_attendance()
