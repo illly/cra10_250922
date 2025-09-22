@@ -56,7 +56,7 @@ class AttendanceManager:
 
     def manage_attendance(self):
         records = self.read_file()
-        if len(records) < 0:
+        if len(records) <= 0:
             return
         self.apply_attendance_data(records)
         self.apply_bonus()
