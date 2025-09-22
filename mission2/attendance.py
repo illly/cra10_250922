@@ -7,23 +7,6 @@ DAY_OF_WEEK_FIELD = "dow"
 MAX_FILE_LENGTH = 500
 NO_FIELDS = 2
 
-# define grade policy
-GRADE = [
-    "GOLD",
-    "SILVER",
-    "NORMAL",
-]
-KEEP_GRADE = [GRADE.index(grade) for grade in GRADE
-                  if grade == 'GOLD'
-                  or grade == 'SILVER'
-              ]
-
-GRADE_CHANGE_SCORE_LIMIT = {
-    "NORMAL": 0,
-    "GOLD": 50,
-    "SILVER": 30,
-}
-
 class AttendanceManager:
     def __init__(self, policy):
         self.policy = policy
@@ -90,22 +73,22 @@ class AttendanceManager:
 
     def change_member_grade(self):
         for member_id in range(1, self.member_cnt + 1):
-            for grade_id, grade in enumerate(GRADE):
-                if self.points[member_id] >= GRADE_CHANGE_SCORE_LIMIT.get(grade):
+            for grade_id, grade in enumerate(self.policy.GRADE):
+                if self.points[member_id] >= self.policy.GRADE_CHANGE_SCORE_LIMIT.get(grade):
                     # 포인트가 50점 이상인 경우 1등급(골드)
                     self.grades[member_id] = grade_id
                     break
 
             # 회원 별 점수 및 등급 출력
             print(f"NAME : {self.names[member_id]}, POINT : {self.points[member_id]}, GRADE : ", end="")
-            print(GRADE[self.grades[member_id]])
+            print(self.policy.GRADE[self.grades[member_id]])
 
 
     def suggest_player_to_remove(self):
         print("\nRemoved player")
         print("==============")
         for i in range(1, self.member_cnt + 1):
-            if self.grades[i] in KEEP_GRADE:
+            if self.grades[i] in self.policy.KEEP_GRADE:
                 continue
             training_attendances = sum([1 for training_dow in self.policy.TRAINING_DOW if self.attendances[i][training_dow] != 0])
             weekend_attendances = sum([1 for weekend_dow in self.policy.WEEKEND_DOW if self.attendances[i][weekend_dow] != 0])
