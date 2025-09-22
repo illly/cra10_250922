@@ -123,7 +123,11 @@ class AttendanceManager:
             DAY_OF_WEEK_FIELD: Calendar.DOW.get(dow)
         }
 
+def create_attendance_manager(policy_version):
+    if policy_version == 1:
+        return AttendanceManager(PolicyVersion1())
+    raise ValueError('Invalid Policy Version came')
 
 if __name__ == "__main__":
-    manager = AttendanceManager(PolicyVersion1())
+    manager = create_attendance_manager(1)
     manager.manage_attendance()
